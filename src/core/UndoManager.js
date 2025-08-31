@@ -56,7 +56,7 @@ export class UndoManager {
   }
 
   async undoFileEdit(operation) {
-    const { filePath, originalContent, oldString, newString, replaceAll, edits, isMultiEdit } = operation.data;
+    const { filePath, originalContent, oldString, newString, replaceAll, edits, isMultiEdit, isMCPEdit } = operation.data;
     
     try {
       const currentContent = await fs.readFile(filePath, 'utf8');
@@ -76,6 +76,15 @@ export class UndoManager {
             // Try to replace new_string back with old_string
             if (revertedContent.includes(edit.new_string)) {
               revertedContent = revertedContent.replace(edit.new_string, edit.old_string);
+            }
+          }
+        }
+      } else if (isMCPEdit && edits) {
+        for (let i = edits.length - 1; i >= 0; i--) {
+          const edit = edits[i];
+          if (edit.newText && edit.oldText !== undefined) {
+            if (revertedContent.includes(edit.newText)) {
+              revertedContent = revertedContent.replace(edit.newText, edit.oldText);
             }
           }
         }

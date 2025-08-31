@@ -93,7 +93,7 @@ export class ClaudeSessionParser {
 
   extractOperation(toolUse, timestamp) {
     const { name, input } = toolUse;
-    
+
     switch (name) {
       case 'Write':
         if (input.file_path) {
@@ -123,6 +123,31 @@ export class ClaudeSessionParser {
         }
         break;
         
+      case 'mcp__filesystem__write_file':
+        if (input.path) {
+          const op = new Operation(OperationType.FILE_CREATE, {
+            filePath: input.path,
+            content: input.content || ''
+          });
+          op.timestamp = new Date(timestamp);
+          op.id = toolUse.id;
+          return op;
+        }
+        break;
+
+      case 'mcp__filesystem__edit_file':
+        if (input.path) {
+          const op = new Operation(OperationType.FILE_EDIT, {
+            filePath: input.path,
+            edits: input.edits || [],
+            isMCPEdit: true
+          });
+          op.timestamp = new Date(timestamp);
+          op.id = toolUse.id;
+          return op;
+        }
+        break;
+
       case 'MultiEdit':
         if (input.file_path) {
           // For MultiEdit, we have multiple edits but still just the strings

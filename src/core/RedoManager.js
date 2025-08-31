@@ -77,7 +77,7 @@ export class RedoManager {
   }
 
   async redoFileEdit(operation) {
-    const { filePath, originalContent, oldString, newString, replaceAll, edits, isMultiEdit } = operation.data;
+    const { filePath, originalContent, oldString, newString, replaceAll, edits, isMultiEdit, isMCPEdit } = operation.data;
     
     try {
       const currentContent = await fs.readFile(filePath, 'utf8');
@@ -102,6 +102,14 @@ export class RedoManager {
             }
           }
         }
+      } else if (isMCPEdit && edits) {
+        for (const edit of edits) {
+          if (edit.oldText !== undefined && edit.newText) {
+            if (redoneContent.includes(edit.oldText)) {
+              redoneContent = redoneContent.replace(edit.oldText, edit.newText);
+            }
+          }
+      }
       } else if (oldString !== undefined && newString) {
         // Redo single Edit operation - apply the original string replacement
         if (replaceAll) {
