@@ -148,6 +148,17 @@ export class ClaudeSessionParser {
         }
         break;
 
+      case 'mcp__filesystem__create_directory':
+        if (input.path) {
+          const op = new Operation(OperationType.DIRECTORY_CREATE, {
+            dirPath: input.path
+          });
+          op.timestamp = new Date(timestamp);
+          op.id = toolUse.id;
+          return op;
+        }
+        break;
+
       case 'MultiEdit':
         if (input.file_path) {
           // For MultiEdit, we have multiple edits but still just the strings
